@@ -14,6 +14,8 @@ Last updated: 2026-09-23
 - Supabase project：`momo-ai-test`（ref：`hwxvtqibbctfstwjkqvo`，Singapore，Free tier）
 - Dashboard：<https://supabase.com/dashboard/project/hwxvtqibbctfstwjkqvo>
 - Edge Function：`momo-ai`，状态 ACTIVE，JWT verification 开启
+- GitHub repository：<https://github.com/tiancaixiaoy/momo-ai-companion>
+- Web preview：<https://tiancaixiaoy.github.io/momo-ai-companion/>（当前为 MOCK 模式）
 - 费用策略：目前只使用 Supabase Free tier；LLM 调用仍有 session 次数、上下文、输出 token 和 timeout 限制
 
 ## 2. 已完成
@@ -69,7 +71,7 @@ Last updated: 2026-09-23
 - 人工评分和真实 bad case 汇总。
 - 根据真实 bad case 完成一次 prompt/context 迭代及重跑。
 - invalid key、function 500、malformed JSON、断网、429、空响应和 unexpected state 的真实线上 failure test。
-- 部署稳定 Web 地址并用 `PRODUCTION_LIKE` 构建验收。
+- 将稳定 Web 地址从 MOCK 切换为经 smoke/eval 验收的 `PRODUCTION_LIKE` 构建。
 
 ## 4. 现存问题
 
@@ -138,6 +140,7 @@ npm run eval:sos
 - TypeScript: passed
 - iOS bundle: passed, 2.2 MB
 - Web bundle: passed, 811 KB
+- GitHub Pages deployment: passed; public index returned HTTP 200
 - Eval dataset integrity: passed, 25 cases
 
 ## 7. Definition of Done 状态
