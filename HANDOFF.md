@@ -6,7 +6,7 @@ Last updated: 2026-09-23
 
 目标是把 Craving SOS 部署到真实 Supabase + LLM 环境，完成 5 条线上 smoke、25 条真实 Eval、人工评分和一次真实 AI 迭代。
 
-结论：**前端已准备通过 GitHub Pages 公开上线；Supabase 项目和 Edge Function 已创建，但真实 AI 与数据库验收仍未完成。** 当前缺少 `OPENAI_API_KEY`，数据库 migration 的直连过程也被远端连接异常阻塞，因此公开 Web 版暂以明确标注的 MOCK 模式运行，没有用 mock 冒充线上模型。
+结论：**前端已通过 GitHub Pages 公开上线，Supabase 项目、数据库 schema 和 Edge Function 均已部署；真实 AI 验收尚未完成。** 当前唯一外部阻塞是缺少 `OPENAI_API_KEY`，因此公开 Web 版暂以明确标注的 MOCK 模式运行，没有用 mock 冒充线上模型。
 
 ### 已创建的云端资源
 
@@ -14,6 +14,7 @@ Last updated: 2026-09-23
 - Supabase project：`momo-ai-test`（ref：`hwxvtqibbctfstwjkqvo`，Singapore，Free tier）
 - Dashboard：<https://supabase.com/dashboard/project/hwxvtqibbctfstwjkqvo>
 - Edge Function：`momo-ai`，状态 ACTIVE，JWT verification 开启
+- Database：3 个 migrations 已通过 Management API 应用；核心表已查询确认
 - GitHub repository：<https://github.com/tiancaixiaoy/momo-ai-companion>
 - Web preview：<https://tiancaixiaoy.github.io/momo-ai-companion/>（当前为 MOCK 模式）
 - 费用策略：目前只使用 Supabase Free tier；LLM 调用仍有 session 次数、上下文、输出 token 和 timeout 限制
@@ -64,7 +65,6 @@ Last updated: 2026-09-23
 
 ## 3. 尚未完成
 
-- 修复 Supabase 数据库直连失败并 push 4 个 migrations。
 - 设置 `OPENAI_API_KEY` / `OPENAI_MODEL`。
 - 5/5 线上 smoke 成功。
 - 25/25 真实 Eval 完成。
@@ -75,12 +75,11 @@ Last updated: 2026-09-23
 
 ## 4. 现存问题
 
-1. **数据库部署阻塞**：`supabase db push` 连续失败，Management API 可登录，但直连 `db.hwxvtqibbctfstwjkqvo.supabase.co` 时连接被远端终止；migration 尚未应用。
-2. **模型密钥缺失**：Edge Function 已部署，但尚未设置 `OPENAI_API_KEY`，真实 AI 调用不可用。
-3. **密钥处置要求**：一次 CLI 查询曾把 legacy anon/service-role JWT 输出到本机任务日志；公开测试前必须在 Supabase 中禁用或轮换 legacy keys。不得把这些值写入 Git 或前端。
-4. **无法声称真实 AI DoD 完成**：还没有真实 smoke、真实 Eval 或 bad-case 迭代结果。
-5. **限流边界**：Edge Function 内存限流不在多实例间共享，只适合小 cohort。
-6. **匿名身份边界**：清理浏览器/App 存储会生成新 ID；当前不做跨设备关联。
+1. **模型密钥缺失**：Edge Function 已部署，但尚未设置 `OPENAI_API_KEY`，真实 AI 调用不可用。
+2. **密钥处置要求**：一次 CLI 查询曾把 legacy anon/service-role JWT 输出到本机任务日志；公开测试前必须在 Supabase 中禁用或轮换 legacy keys。不得把这些值写入 Git 或前端。
+3. **无法声称真实 AI DoD 完成**：还没有真实 smoke、真实 Eval 或 bad-case 迭代结果。
+4. **限流边界**：Edge Function 内存限流不在多实例间共享，只适合小 cohort。
+5. **匿名身份边界**：清理浏览器/App 存储会生成新 ID；当前不做跨设备关联。
 
 ## 5. 接下来怎么做
 
@@ -92,12 +91,6 @@ npx supabase@latest secrets set OPENAI_API_KEY=<SECRET> OPENAI_MODEL=<APPROVED_M
 ```
 
 请勿把 secret 发到聊天、写入 `.env` 或提交到 Git。
-
-### B. 部署
-
-```bash
-npx supabase@latest db push --linked
-```
 
 在本地建立不会被 Git 跟踪的 `.env.production-like`：
 
@@ -132,7 +125,7 @@ npm run eval:sos
 - Supabase CLI version: `2.117.0`
 - Supabase project: created, linked, ACTIVE_HEALTHY
 - Edge Function: deployed, ACTIVE
-- Database migrations: blocked by terminated direct Postgres connection
+- Database migrations: applied through Management API; core tables verified
 - OpenAI secret: not configured
 - Secret pattern scan: no real key found
 - Smoke runner: executed, correctly returned `SKIPPED` without credentials
