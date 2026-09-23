@@ -6,7 +6,7 @@ Last updated: 2026-09-23
 
 目标是把 Craving SOS 部署到真实 Supabase + LLM 环境，完成 5 条线上 smoke、25 条真实 Eval、人工评分和一次真实 AI 迭代。
 
-结论：**前端已通过 GitHub Pages 公开上线，Supabase 项目、数据库 schema 和 Edge Function 均已部署；真实 AI 验收尚未完成。** 当前唯一外部阻塞是缺少 `OPENAI_API_KEY`，因此公开 Web 版暂以明确标注的 MOCK 模式运行，没有用 mock 冒充线上模型。
+结论：**前端已通过 GitHub Pages 公开上线，Supabase 项目、数据库 schema 和 Edge Function 均已部署；真实 AI 验收尚未完成。** AI 服务已按项目要求切换为 DeepSeek，当前唯一外部阻塞是缺少 `DEEPSEEK_API_KEY`，因此公开 Web 版暂以明确标注的 MOCK 模式运行。
 
 ### 已创建的云端资源
 
@@ -65,7 +65,7 @@ Last updated: 2026-09-23
 
 ## 3. 尚未完成
 
-- 设置 `OPENAI_API_KEY` / `OPENAI_MODEL`。
+- 设置 `DEEPSEEK_API_KEY` / `DEEPSEEK_MODEL`。
 - 5/5 线上 smoke 成功。
 - 25/25 真实 Eval 完成。
 - 人工评分和真实 bad case 汇总。
@@ -75,7 +75,7 @@ Last updated: 2026-09-23
 
 ## 4. 现存问题
 
-1. **模型密钥缺失**：Edge Function 已部署，但尚未设置 `OPENAI_API_KEY`，真实 AI 调用不可用。
+1. **模型密钥缺失**：Edge Function 已切换到 DeepSeek Responses API，但尚未设置 `DEEPSEEK_API_KEY`，真实 AI 调用不可用。
 2. **密钥处置要求**：一次 CLI 查询曾把 legacy anon/service-role JWT 输出到本机任务日志；公开测试前必须在 Supabase 中禁用或轮换 legacy keys。不得把这些值写入 Git 或前端。
 3. **无法声称真实 AI DoD 完成**：还没有真实 smoke、真实 Eval 或 bad-case 迭代结果。
 4. **限流边界**：Edge Function 内存限流不在多实例间共享，只适合小 cohort。
@@ -87,7 +87,7 @@ Last updated: 2026-09-23
 
 ```bash
 cd "/Users/wuqimahei/Documents/ChatGPT/项目/momo"
-npx supabase@latest secrets set OPENAI_API_KEY=<SECRET> OPENAI_MODEL=<APPROVED_MODEL>
+npx supabase@latest secrets set DEEPSEEK_API_KEY=<SECRET> DEEPSEEK_MODEL=deepseek-flash
 ```
 
 请勿把 secret 发到聊天、写入 `.env` 或提交到 Git。
@@ -126,7 +126,7 @@ npm run eval:sos
 - Supabase project: created, linked, ACTIVE_HEALTHY
 - Edge Function: deployed, ACTIVE
 - Database migrations: applied through Management API; core tables verified
-- OpenAI secret: not configured
+- DeepSeek secret: not configured
 - Secret pattern scan: no real key found
 - Smoke runner: executed, correctly returned `SKIPPED` without credentials
 - 25-case Eval runner: executed, correctly returned `SKIPPED` without credentials

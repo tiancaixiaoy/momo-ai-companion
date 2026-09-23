@@ -35,7 +35,7 @@ Supabase 新项目可执行 `supabase/migrations/202609050001_initial_schema.sql
 
 1. 在 `.env` 中填写 `EXPO_PUBLIC_SUPABASE_URL` 和 `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`。
 2. 对 Supabase 项目依次执行 `supabase/migrations/` 下的迁移。
-3. 通过 `supabase secrets set OPENAI_API_KEY=...` 配置服务端密钥。
+3. 通过 `supabase secrets set DEEPSEEK_API_KEY=... DEEPSEEK_MODEL=deepseek-flash` 配置服务端密钥。
 4. 部署 AI 函数：`supabase functions deploy momo-ai`。
 
 应用检测到云端配置后，`src/services/ai/` 会自动从离线 provider 切换到 Supabase Edge Function。认证、餐食、体重和 Craving 的云端仓储接口位于 `src/services/`。

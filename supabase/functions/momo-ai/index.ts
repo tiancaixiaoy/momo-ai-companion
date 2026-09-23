@@ -137,10 +137,10 @@ function outputText(response: any) {
       if (part.type === "output_text") return part.text;
   throw new Error("empty-model-output");
 }
-async function openAI(body: unknown) {
-  const key = Deno.env.get("OPENAI_API_KEY");
-  if (!key) throw new Error("missing-openai-key");
-  const response = await fetch("https://api.openai.com/v1/responses", {
+async function callDeepSeek(body: unknown) {
+  const key = Deno.env.get("DEEPSEEK_API_KEY");
+  if (!key) throw new Error("missing-deepseek-key");
+  const response = await fetch("https://api.deepseek.com/responses", {
     method: "POST",
     signal: AbortSignal.timeout(14000),
     headers: {
@@ -150,7 +150,7 @@ async function openAI(body: unknown) {
     body: JSON.stringify(body),
   });
   if (response.status === 429) throw new Error("rate-limit");
-  if (!response.ok) throw new Error(`openai-${response.status}`);
+  if (!response.ok) throw new Error(`deepseek-${response.status}`);
   return response.json();
 }
 
@@ -158,7 +158,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   try {
     const { action, payload } = await req.json();
-    const model = Deno.env.get("OPENAI_MODEL") || "gpt-5.6-luna";
+    const model = Deno.env.get("DEEPSEEK_MODEL") || "deepseek-flash";
     if (action === "analytics_event") {
       await storeAnalytics(payload);
       return Response.json({ ok: true }, { headers: cors });
@@ -176,15 +176,15 @@ Deno.serve(async (req: Request) => {
           image_url: `data:image/jpeg;base64,${payload.imageBase64}`,
           detail: "low",
         });
-      const result = await openAI({
+      const result = await callDeepSeek({
         model,
         store: false,
+        reasoning: { effort: "none" },
         input: [{ role: "user", content }],
         text: {
           format: {
             type: "json_schema",
             name: "food_analysis",
-            strict: true,
             schema: foodSchema,
           },
         },
@@ -193,9 +193,10 @@ Deno.serve(async (req: Request) => {
       return Response.json(JSON.parse(outputText(result)), { headers: cors });
     }
     if (action === "companion_reply") {
-      const result = await openAI({
+      const result = await callDeepSeek({
         model,
         store: false,
+        reasoning: { effort: "none" },
         instructions:
           "你是长期陪伴用户进行饮食管理的 AI Companion。回复使用简体中文，短、自然、具体，不评判食物，不使用失败或破戒等语言。每次最多问一个核心问题。",
         input: JSON.stringify(payload),
@@ -215,16 +216,16 @@ Deno.serve(async (req: Request) => {
           ? payload.recent_messages.slice(-6)
           : [],
       };
-      const result = await openAI({
+      const result = await callDeepSeek({
         model,
         store: false,
+        reasoning: { effort: "none" },
         instructions: cravingInstructions,
         input: JSON.stringify(clean),
         text: {
           format: {
             type: "json_schema",
             name: "craving_sos_response",
-            strict: true,
             schema: cravingSchema,
           },
         },

@@ -18,7 +18,7 @@ Audit date: 2026-09-16
 - 没有 Supabase CLI 登录：`projects list` 返回 `Access token not provided`。
 - 没有 remote project ref，本地项目尚未 link。
 - 没有可用的 Supabase URL / publishable key。
-- 没有 Edge Function 中的 `OPENAI_API_KEY`。
+- 没有 Edge Function 中的 `DEEPSEEK_API_KEY`。
 - `momo-ai` 尚未部署到远端。
 - 5 条线上 smoke、25 条真实 Eval、人工评分和基于真实 bad case 的二次迭代尚未执行。
 - 稳定 Web 托管地址尚未发布；LocalTunnel 只是临时前端预览。
@@ -35,7 +35,7 @@ Audit date: 2026-09-16
 
 1. 登录 Supabase CLI 并 link 一个 project。
 2. push 现有 migrations。
-3. 在 Edge Function secrets 设置 `OPENAI_API_KEY` 和可选 `OPENAI_MODEL`。
+3. 在 Edge Function secrets 设置 `DEEPSEEK_API_KEY` 和可选 `DEEPSEEK_MODEL`。
 4. deploy `momo-ai`。
 5. 创建本地 `.env.production-like`，设置 URL、publishable key 和 `EXPO_PUBLIC_AI_MODE=PRODUCTION_LIKE`。
 6. 先运行 5 条 smoke，再运行 25 条 Eval。
