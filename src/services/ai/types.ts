@@ -1,0 +1,2 @@
+export type FoodAnalysis={meal_name:string;items:Array<{name:string;amount_description:string;calories:number;protein_g:number;carbs_g:number;fat_g:number;confidence:number}>;total_calories:number;protein_g:number;carbs_g:number;fat_g:number;confidence:number};
+export interface AIProvider{analyzeFood(input:{imageBase64?:string;text?:string}):Promise<FoodAnalysis>;companionReply(input:{message:string;context:unknown}):Promise<string>;extractMemories(input:{messages:unknown[];existing:unknown[]}):Promise<unknown[]>}
