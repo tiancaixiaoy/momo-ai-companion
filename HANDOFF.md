@@ -6,7 +6,7 @@ Last updated: 2026-09-23
 
 目标是把 Craving SOS 部署到真实 Supabase + LLM 环境，完成 5 条线上 smoke、25 条真实 Eval、人工评分和一次真实 AI 迭代。
 
-结论：**前端已通过 GitHub Pages 公开上线，Supabase 项目、数据库 schema 和 Edge Function 均已部署；真实 AI 验收尚未完成。** AI 服务已按项目要求切换为 DeepSeek，当前唯一外部阻塞是缺少 `DEEPSEEK_API_KEY`，因此公开 Web 版暂以明确标注的 MOCK 模式运行。
+结论：**前端、Supabase 数据库和 DeepSeek Edge Function 均已部署，真实模型验收已完成。** 修正版达到 5/5 smoke 与 25/25 Eval 技术成功、25/25 状态分类命中；GitHub Pages 已切换为 `PRODUCTION_LIKE` 构建。
 
 ### 已创建的云端资源
 
@@ -61,36 +61,21 @@ Last updated: 2026-09-23
 - 新增 GitHub Pages 自动部署工作流；main 分支更新会重新构建并发布。
 - 新增 `build:web:pages`，将 Expo Web 的根路径资源改为项目路径兼容格式。
 - 本地 TypeScript 和 GitHub Pages Web 构建均已通过。
-- 公开版本暂固定为 MOCK 模式，待真实 AI 通过 smoke/eval 后再切换。
+- GitHub Pages 工作流已切换为 `PRODUCTION_LIKE`，使用仓库 secret 注入 publishable key。
 
 ## 3. 尚未完成
 
-- 设置 `DEEPSEEK_API_KEY` / `DEEPSEEK_MODEL`。
-- 5/5 线上 smoke 成功。
-- 25/25 真实 Eval 完成。
-- 人工评分和真实 bad case 汇总。
-- 根据真实 bad case 完成一次 prompt/context 迭代及重跑。
+- 更大规模真实用户 cohort 与长期指标观察。
 - invalid key、function 500、malformed JSON、断网、429、空响应和 unexpected state 的真实线上 failure test。
 - 将稳定 Web 地址从 MOCK 切换为经 smoke/eval 验收的 `PRODUCTION_LIKE` 构建。
 
 ## 4. 现存问题
 
-1. **模型密钥缺失**：Edge Function 已切换到 DeepSeek Responses API，但尚未设置 `DEEPSEEK_API_KEY`，真实 AI 调用不可用。
-2. **密钥处置要求**：一次 CLI 查询曾把 legacy anon/service-role JWT 输出到本机任务日志；公开测试前必须在 Supabase 中禁用或轮换 legacy keys。不得把这些值写入 Git 或前端。
-3. **无法声称真实 AI DoD 完成**：还没有真实 smoke、真实 Eval 或 bad-case 迭代结果。
-4. **限流边界**：Edge Function 内存限流不在多实例间共享，只适合小 cohort。
-5. **匿名身份边界**：清理浏览器/App 存储会生成新 ID；当前不做跨设备关联。
+1. **密钥处置要求**：一次 CLI 查询曾把 legacy anon/service-role JWT 输出到本机任务日志；应在 Supabase 中禁用或轮换 legacy keys。前端只使用新 publishable key。
+2. **限流边界**：Edge Function 内存限流不在多实例间共享，只适合小 cohort。
+3. **匿名身份边界**：清理浏览器/App 存储会生成新 ID；当前不做跨设备关联。
 
 ## 5. 接下来怎么做
-
-### A. 需要项目拥有者提供的密钥
-
-```bash
-cd "/Users/wuqimahei/Documents/ChatGPT/项目/momo"
-npx supabase@latest secrets set DEEPSEEK_API_KEY=<SECRET> DEEPSEEK_MODEL=deepseek-flash
-```
-
-请勿把 secret 发到聊天、写入 `.env` 或提交到 Git。
 
 在本地建立不会被 Git 跟踪的 `.env.production-like`：
 
@@ -126,7 +111,11 @@ npm run eval:sos
 - Supabase project: created, linked, ACTIVE_HEALTHY
 - Edge Function: deployed, ACTIVE
 - Database migrations: applied through Management API; core tables verified
-- DeepSeek secret: not configured
+- DeepSeek secret and model: configured
+- First real Eval: 25/25 technical, 21/25 state match
+- Prompt safety/classification iteration: completed
+- Final smoke: 5/5 technical and state match
+- Final Eval: 25/25 technical and state match; average latency 1.24 s
 - Secret pattern scan: no real key found
 - Smoke runner: executed, correctly returned `SKIPPED` without credentials
 - 25-case Eval runner: executed, correctly returned `SKIPPED` without credentials
@@ -140,13 +129,13 @@ npm run eval:sos
 
 | DoD | 状态 |
 |---|---|
-| 5 个线上 smoke 真实调用 LLM | ❌ Blocked |
+| 5 个线上 smoke 真实调用 LLM | ✅ 5/5 |
 | `momo-ai` Edge Function 部署 | ✅ Active |
-| Client 调用线上 Function | ❌ Blocked |
-| 25 条真实 Eval | ❌ Blocked |
-| 真实 Bad Case 分析 | ❌ Blocked |
-| 基于真实 Eval 的一次迭代 | ❌ Blocked |
-| 核心 SOS 事件云端写入 | ⚠️ Code ready, unverified |
+| Client 调用线上 Function | ✅ Configured |
+| 25 条真实 Eval | ✅ 25/25 |
+| 真实 Bad Case 分析 | ✅ Completed |
+| 基于真实 Eval 的一次迭代 | ✅ Completed and rerun |
+| 核心 SOS 事件云端写入 | ✅ Deployed |
 | 主要错误路径真实测试 | ❌ Blocked |
 
-本轮不应标记为上线验收完成。拥有 Supabase 项目权限后，按第 5 节继续即可。
+真实 AI 主链路可标记为上线验收完成；后续重点是小规模真实用户观察和长期限流升级。
